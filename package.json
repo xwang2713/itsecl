@@ -1,0 +1,41 @@
+{
+  "name": "itsecl",
+  "version": "0.0.1",
+  "description": "ITSECL is a Typescript/ECL kernel for the Jupyter notebook (A Modified version of IJavascript module)",
+  "keywords": [
+    "typescript",
+    "kernel",
+    "ipython",
+    "jupyter"
+  ],
+  "homepage": "",
+  "bugs": {
+    "url": "https://github.com/xwang2713/itsecl/issues"
+  },
+  "license": "BSD-3-Clause",
+  "author": {
+    "name": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xwang2713/itsecl.git"
+  },
+  "bin": {
+    "itsecl": "bin/itsecl.js",
+    "itseclkernel": "lib/kernel.js"
+  },
+  "dependencies": {
+    "jpecl-kernel": "git+http://github.com/xwang2713/jpecl-kernel.git",
+    "typescript": "latest",
+    "uuid": "^3.0.1",
+    "@hpcc-js/comms": "latest"
+  },
+  "devDependencies": {
+    "debug": "latest",
+    "tslint": "latest"
+  },
+  "scripts": {
+    "lint": "tslint bin/*.ts lib/*.ts",
+    "tsc": "npm run lint; tsc"
+  }
+}

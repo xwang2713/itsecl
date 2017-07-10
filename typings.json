@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "debug": "registry:npm/debug#2.0.0+20160723033700",
+    "uuid": "registry:npm/uuid#3.0.1+20161206160008"
+  },
+  "globalDependencies": {
+    "node": "registry:env/node#4.0.0+20161105011511"
+  }
+}
