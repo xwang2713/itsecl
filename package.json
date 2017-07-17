@@ -31,6 +31,7 @@
     "@hpcc-js/comms": "latest"
   },
   "devDependencies": {
+    "@types/node": "^8.0.13",
     "debug": "latest",
     "tslint": "latest"
   },

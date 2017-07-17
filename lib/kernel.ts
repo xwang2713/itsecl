@@ -40,6 +40,7 @@ import path = require("path");
 import * as ts from "typescript";
 import { ECLExecutor } from "./eclkernel"
 let Kernel = require("jpecl-kernel");
+import vm = require("vm");
 
 class Logger {
     private static usage = `
@@ -263,6 +264,39 @@ let config = Parser.parse();
 
 // Start kernel
 let kernel = new Kernel(config);
+
+// WORKAROUND: Fixes https://github.com/n-riesco/ijavascript/issues/97
+kernel.handlers.is_complete_request = function is_complete_request(request) {
+    request.respond(this.iopubSocket, 'status', {
+        execution_state: 'busy'
+    });
+
+    var content;
+    try {
+        new vm.Script(request.content.code);
+        content = {
+            status: "complete",
+        };
+    } catch (err) {
+        content = {
+            status: "incomplete",
+            indent: "",
+        };
+    }
+
+    request.respond(
+        this.shellSocket,
+        "is_complete_reply",
+        content,
+        {},
+        this.protocolVersion
+    );
+
+    request.respond(this.iopubSocket, 'status', {
+        execution_state: 'idle'
+    });
+};
+
 
 // Interpret a SIGINT signal as a request to interrupt the kernel
 process.on("SIGINT", function () {

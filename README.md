@@ -26,4 +26,46 @@ jupyter notebook
 # Then select kernel "tsecl" from "new"
 ```
 
+## Usage
+
+### Run normal Javascript/Typescript code:
+```sh
+//JS
+var i = 10; i;
+```
+
+### Test connection with HPCC esp server
+***This is still under development***
+
+In order to run ECL code you should test connection with HPCC ESP server first 
+```sh
+//CONN  ip=192.168.56.100; port=8010; cluster=hthor; user=<username>; password=<password>;
+```
+The above connection parameters can be provided from a file
+```sh
+//CONN  file=/tmp/esp.cfg;
+```
+The file should can have following entries:
+```sh
+ip=190.29.2.11
+port=8018
+cluster=thor
+user=hpccuser
+passwd=mypassword
+default=ECL
+```
+
+### Test connection with HPCC esp server
+***This is still under development***
+
+ECL code
+```sh
+//ECL
+OUTPUT("Hello ECL");
+```
+If default action is set to "ECL", which is default, "//ECL" can be avoid"
+
+
+
+
 
