@@ -38,10 +38,12 @@
 import fs = require("fs");
 import path = require("path");
 import * as ts from "typescript";
-import { ECLExecutor } from "./eclkernel"
+import { Logger } from "./logging";
+import { ECLExecutor } from "./eclkernel";
 let Kernel = require("jpecl-kernel");
 import vm = require("vm");
 
+/*
 class Logger {
     private static usage = `
 Usage: node kernel.js [--debug] [--hide-undefined] [--protocol=Major[.minor[.patch]]] [--session-working-dir=path] [--show-undefined] [--startup-script=path] connection_file
@@ -78,6 +80,7 @@ Usage: node kernel.js [--debug] [--hide-undefined] [--protocol=Major[.minor[.pat
         console.error(Logger.usage);
     }
 }
+*/
 
 interface KernelConfig {
     cwd: string;

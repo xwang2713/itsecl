@@ -119,7 +119,7 @@ var Flags = (function () {
     Object.defineProperty(Flags, "installAt", {
         set: function (flag) {
             var loc = InstallLoc[flag];
-            if (!loc) {
+            if (loc == null) {
                 Logger.throwAndExit(true, false, "Invalid flag for install location", flag);
             }
             Flags.install = loc;
@@ -465,7 +465,8 @@ var Main = (function () {
         var specFile = path.join(specDir, "kernel.json");
         var spec = {
             argv: Arguments.kernel,
-            display_name: "TSECL " + require("typescript").version.replace(/([0-9]+\.[0-9]+)\..*/g, "$1"),
+            //display_name: `TSECL  ${Main.packageJSON.version.replace(/([0-9]+\.[0-9]+)\..*/g,"$1")}`,
+            display_name: "HPCC ECL - TSECL",
             language: "typescript",
         };
         fs.writeFileSync(specFile, JSON.stringify(spec));
@@ -526,6 +527,7 @@ Main.prepare(function () {
         Main.setProtocol();
         Main.installKernelAsync(function () {
             Logger.printContext();
+            console.log(Flags);
             if (!Flags.installPath) {
                 Main.spawnFrontend();
             }

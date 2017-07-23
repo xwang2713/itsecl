@@ -1,29 +1,44 @@
 # ITSECL
 
-This project is still in protype stage which reference the implementation of [ITypecript](https://github.com/nearbydelta/itypescript)
-
 ITSECL is a Typescript/ECL kernel for the [Jupyter notebook](http://jupyter.org/)...
+It provide a prototype implementation of HPCC ECL for Jupyter Notebook by referencing [ITypecript](https://github.com/nearbydelta/itypescript)
+
+The HPCC Systems server platform is a free, open source, massively scalable platform for big data analytics. Download the HPCC Systems server platform now and take the reins of the same core technology that LexisNexis has used for over a decade to analyze massive data sets for its customers in industry, law enforcement, government, and science.
+
+For more information and related downloads for HPCC Systems Products, please visit
+https://hpccsystems.com
+
 
 ## Installations
+npm install will come soon. For now use following:
 ```sh
 npm config set prefix <install directory>
 # make sure <install directory>/bin is in PATH
 git clone https://github.com/xwang2713/itsecl
 cd ijsecl
 npm install -g .
-<install directory>/bin/itsecl --install=local
-There is warning "Invalid flag for install location local" but installation is OK
-# To verify ITSECL kernel (jsecl) installed in jupyter:
-jupyter kernelspec list
 ```
-To run ITSECL in jupyter consoel
+To install itsecl to Jupyter and start Jupyter Notebook:
+In your Jupyter Notebook work directory which can be any directory. The Jupyter notebook files will be saved here.
 ```sh
-jupyter console --kernel=tsecl
+itsecl --install=local
+
+# If you want to see itsecl kernel debug message add "--ts-debug"
+# To verify ITSECL kernel (jsecl) installed in jupyter:
+jupyter kernelspec list. "tsecl" is the kernel name.
 ```
 To run ITSECL in jupyter notebook
 ```sh
 jupyter notebook
+
+# Or with debug information for tsecl kernel:
+
+itsecl --ts-debug   
 # Then select kernel "tsecl" from "new"
+```
+To run ITSECL in jupyter console (Currenly support for console is limit. Try to use notebook instead). 
+```sh
+jupyter console --kernel=tsecl
 ```
 
 ## Usage
@@ -35,7 +50,6 @@ var i = 10; i;
 ```
 
 ### Test connection with HPCC esp server
-***This is still under development***
 
 In order to run ECL code you should test connection with HPCC ESP server first 
 ```sh
@@ -43,9 +57,9 @@ In order to run ECL code you should test connection with HPCC ESP server first
 ```
 The above connection parameters can be provided from a file
 ```sh
-//CONN  file=/tmp/esp.cfg;
+//CONN  file=/tmp/esp.conf;
 ```
-The file should can have following entries:
+Sample esp.conf:
 ```sh
 ip=190.29.2.11
 port=8018
@@ -53,6 +67,11 @@ cluster=thor
 user=hpccuser
 passwd=mypassword
 default=ECL
+```
+
+To display the current configuration:
+```sh
+//CONF
 ```
 
 ### Test connection with HPCC esp server
@@ -66,6 +85,11 @@ OUTPUT("Hello ECL");
 If default action is set to "ECL", which is default, "//ECL" can be avoid"
 
 
+To change cluster 
+```sh
+//ECL cluster=roxie;
+...
+```
 
 
 

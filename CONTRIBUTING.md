@@ -1,4 +1,4 @@
-# Contributing to ITypescript
+# Contributing to ITSECL
 
 First of all, thank you for taking the time to contribute.
 

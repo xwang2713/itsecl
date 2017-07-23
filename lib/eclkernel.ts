@@ -1,19 +1,57 @@
 #!/usr/bin/env node
 
 /// <reference path="../typings/index.d.ts" />
+/*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2015, Nicolas Riesco and others as credited in the AUTHORS file
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 
 import * as fs from "fs";
 import { Workunit } from "@hpcc-js/comms";
-import { WUAction } from "@hpcc-js/comms";
+//import { WUAction } from "@hpcc-js/comms";
+import { Logger } from "./logging";
+import * as util  from "util";
 
+/*
 var log = (...msgs: any[]) => {
             //process.stderr.write("KERNEL: ");
             console.error("ECL-KERNEL: " + msgs.join(" "));
         };
+*/
 
 
 export interface ESPConfig {
-    // ESP server ip address
+    //  SP server ip address
     ip: string;
 
     // ESP port. The default is ECLWatch port 8010
@@ -29,6 +67,55 @@ export interface ESPConfig {
     password: string;
 }
 
+
+export interface ECLSubmitResult {
+   [key:string]: string;
+}
+
+export interface ECLSubmitError {
+    ename:     string;
+    evalue:    string;
+    traceback: string; 
+}
+
+export class ECLResult  {
+    mime: ECLSubmitResult;
+    error: ECLSubmitError = { ename: "", evalue: "", traceback: ""}
+   
+    renderInHtml(rows: any) {
+       if (rows.length == 0 ) {
+          this.mime['text/html'] = "No Result";
+          return;
+       }
+       let htmlTable = "<table style=\"border:1px; cellspacing:0; cellpadding:0; width: 100%; text-align:left\">\n";
+       htmlTable = htmlTable + "<tr><th>##</th>";
+       for (let k in rows[0]) {
+          htmlTable = htmlTable + "<th>" + k.trim() + "</th>";
+       }
+       htmlTable = htmlTable + "</tr>\n";
+
+       for (let i=0; i < rows.length; i++) {
+           htmlTable = htmlTable + "<tr><td>" + (i+1) + "</td>";
+           for (let k in rows[i]) {
+               let v = rows[i][k];
+               //if (typeof (v) == "string" ) {
+               //    v = v.trim();
+               //}
+               htmlTable = htmlTable + "<td>" + v + "</td>";
+           }
+           htmlTable = htmlTable + "</tr>\n";
+       }
+       htmlTable = htmlTable + "</table>";
+       this.mime['text/html'] = htmlTable;
+    }
+
+    setError(e: any) {
+       this.error.ename =  (e && e.name) ? e.name : typeof e;
+       this.error.evalue =  (e && e.message) ? e.message : util.inspect(e);
+       this.error.traceback =  (e && e.stack) ? e.stack.split("\n") : "";
+    }
+}
+
 /**
  * @class 
  * @classdesc Implements HPCC ESP Connection and ECL code submittion for JS-ECL kernel 
@@ -41,6 +128,9 @@ export class ECLExecutor  {
      protected user: string = ""; 
      protected password: string = ""; 
      protected defaultTask: string = "ECL"; 
+     protected configFile: string = ""; 
+     eclResult = new ECLResult();
+
 
 
      get config(): ESPConfig {
@@ -64,7 +154,7 @@ export class ECLExecutor  {
      }
 
      setConfig(code: string) {
-         let match = code.match(/^\s*\/\/CONN.*\n/i);
+         let match = code.match(/^\s*\/\/CONN.*/i);
          if (match == null) {
              return;
          }
@@ -75,11 +165,11 @@ export class ECLExecutor  {
          }
          this.getConfigFromString(line);
 
-         if (line.search(/^\s*\/\/CONN\s* default.*\n/i) >= 0) {
+         if (line.search(/^\s*\/\/CONN\s* default.*/i) >= 0) {
              this. defaultTask = "CONN";
-         } else if (line.search(/^\s*\/\/JS\s* default.*\n/i) >= 0 ) {
+         } else if (line.search(/^\s*\/\/JS\s* default.*/i) >= 0 ) {
              this.defaultTask = "JS";
-         } else if (line.search(/^\s*\/\/ECL\s* default.*\n/i) >= 0) {
+         } else if (line.search(/^\s*\/\/ECL\s* default.*/i) >= 0) {
              this.defaultTask = "ECL";
          }
      }
@@ -120,38 +210,19 @@ export class ECLExecutor  {
      * @param {String} code 
      */
     taskType(code: string): string {
-        //log(code);
         if (code.search(/^\s*\/\/CONN/i) >= 0) {
            return "CONN";
         } else if (code.search(/^\s*\/\/ECL/i) >= 0) {
            return "ECL";
         } else if (code.search(/^\s*\/\/JS/i) >= 0) {
            return "JS";
+        } else if (code.search(/^\s*\/\/CONF/i) >= 0) {
+           return "CONF";
         } else {
            return this.defaultTask;
         }
     }
 
-    logConfig(): void {
-       log("ip="+this.ip + " port=" + this.port + " cluster=" + this.cluster + 
-           " user=" + this.user + " password=" + this.password + " default=" + this.defaultTask);
-    }
-
-    execute_ecl(code: string): Promise<WUAction.Response> {
-        let ESP_URL = "http://" + this.ip + ":" + this.port;
-        return Workunit.submit({ baseUrl: ESP_URL, userID: this.user, password: this.password }, this.cluster, code).then((wu) => {
-            return wu.watchUntilComplete();
-        }).then((wu) => {
-            return wu.fetchResults().then((results) => {
-                return results[0].fetchRows();
-            }).then((rows) => {
-                //  Do Dtuff With Results !!!
-                return wu;
-            });
-        }).then((wu) => {
-             return wu.delete();
-        });
-    }
 
     /**
      * HPCC Handler for 'execute_request' message
@@ -164,23 +235,57 @@ export class ECLExecutor  {
         if (task_type == "CONN")  {
            // parse code to get espConfig
            this.setConfig(code);
-           this.logConfig();
            //construct code for connection test
-           code = "'Hello and Welcome';"; 
+           code = "'Connection with HPCC ESP server succeed';"; 
         } else { // ECL
+           if (code.search(/^\s*\/\/ECL\s* cluster.*/i) >= 0) {
+             this.cluster = this.getValue(code, "cluster");
+           }
            // remove "//ECL" from request.code
            code = code.replace(/^\s*\/\/ECL[^\n]*\n/, "");
-                      
         }
 
         this.beforeRun(base, request);
-        //call  sumbit_ecl
-        let ecl_result = this.execute_ecl(code);
-        log("ecl result: " + ecl_result);
-        //create result
-        let result = { mime: { 'text/plain': '\'Task type: ' + task_type + '\'' } };
-        this.onSuccess(base, request, result);
-        this.afterRun(base, request);
+
+        if (task_type == "CONF")  {
+           let configStr = "ip="+this.ip + " port=" + this.port + " cluster=" + this.cluster + 
+           " user=" + this.user + " default=" + this.defaultTask;
+           let result = { mime: { 'text/plain': '\'Config: ' + configStr + '\'' } };
+           this.onSuccess(base, request, result);
+           this.afterRun(base, request);
+           return;
+        }
+        let ESP_URL = "http://" + this.ip + ":" + this.port;
+        let executor = this;
+        Logger.log ("ESP_URL: " + ESP_URL);
+        Logger.log ("code: " + code);
+        Workunit.submit({ baseUrl: ESP_URL, userID: this.user, password: this.password }, this.cluster, code).then((wu) => {
+            return wu.watchUntilComplete();
+        }).then((wu) => {
+            return wu.fetchResults().then((results) => {
+                return results[0].fetchRows();
+            }).then((rows) => {
+                //  Do Dtuff With Results !!!
+                if (task_type == "CONN")  {
+                    executor.eclResult.mime = {'text/plain': rows[0]['Result_1']};
+                } else {
+                    //executor.eclResult.mime = {'text/plain': 'ECL'};
+                    executor.eclResult.renderInHtml(rows);
+                }
+                executor.onSuccess(base, request, executor.eclResult);
+                executor.afterRun(base, request);
+                return wu;
+            });
+        }).then((wu) => {
+            if ( task_type == "CONN" ) {
+                 return wu.delete();
+            }
+        }).catch((e) => { // error handle
+           console.log("catch error");
+           console.log(e);
+           executor.eclResult.setError(e);
+           executor.onError(base, request, executor.eclResult);
+        });
 
     }
 
@@ -269,5 +374,6 @@ export class ECLExecutor  {
             }
         );
     }
-
 }
+
+
