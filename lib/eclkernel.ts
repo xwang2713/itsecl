@@ -79,7 +79,7 @@ export interface ECLSubmitError {
 }
 
 export class ECLResult  {
-    mime: ECLSubmitResult;
+    mime: ECLSubmitResult = {};
     error: ECLSubmitError = { ename: "", evalue: "", traceback: ""}
    
     renderInHtml(rows: any) {
