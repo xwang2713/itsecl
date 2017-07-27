@@ -10,31 +10,42 @@ https://hpccsystems.com
 
 
 ## Installations
-npm install will come soon. For now use following:
+
+Prerequites:
+python-dev, python3.5-dev, python-pip python3-pip jupyter nodejs
+
+For example on Ubuntu 16.04 xenial 
 ```sh
-npm config set prefix <install directory>
-# make sure <install directory>/bin is in PATH
-git clone https://github.com/xwang2713/itsecl
-cd ijsecl
-npm install -g .
+sudo apt-get install -y curl git python-dev python3.5-dev python3-pip
+sudo pip3 install jupyter
+sudo curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+ 
 ```
-To install itsecl to Jupyter and start Jupyter Notebook:
-In your Jupyter Notebook work directory which can be any directory. The Jupyter notebook files will be saved here.
+Install ITSECL
 ```sh
-itsecl --install=local
+npm install -g itsecl
+npm install -g request
+npm install -g d3-time-format
+
+```
+To install itsecl kernel to Jupyter 
+```sh
+itsecl --ts-install=global
 
 # If you want to see itsecl kernel debug message add "--ts-debug"
 # To verify ITSECL kernel (jsecl) installed in jupyter:
 jupyter kernelspec list. "tsecl" is the kernel name.
 ```
-To run ITSECL in jupyter notebook
+To run ITSECL in jupyter notebook in your Jupyter Notebook work directory which can be any directory. The Jupyter notebook files will be saved here.
 ```sh
 jupyter notebook
 
 # Or with debug information for tsecl kernel:
 
 itsecl --ts-debug   
-# Then select kernel "tsecl" from "new"
+# Then select kernel "HPCC ECL - TSECL" from "new"
 ```
 To run ITSECL in jupyter console (Currenly support for console is limit. Try to use notebook instead). 
 ```sh
