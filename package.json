@@ -28,7 +28,7 @@
     "jpecl-kernel": "git+http://github.com/xwang2713/jpecl-kernel.git",
     "typescript": "latest",
     "uuid": "^3.0.1",
-    "@hpcc-js/comms": "latest"
+    "@hpcc-js/comms": "0.0.28"
   },
   "devDependencies": {
     "@types/node": "^8.0.13",
