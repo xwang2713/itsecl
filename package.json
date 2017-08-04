@@ -1,6 +1,6 @@
 {
   "name": "itsecl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ITSECL is a Typescript/ECL kernel for the Jupyter notebook (A Modified version of IJavascript module)",
   "keywords": [
     "typescript",
