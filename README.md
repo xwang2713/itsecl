@@ -1,7 +1,7 @@
 # ITSECL
 
 ITSECL is a Typescript/ECL kernel for the [Jupyter notebook](http://jupyter.org/)...
-It provide a prototype implementation of HPCC ECL for Jupyter Notebook by referencing [ITypecript](https://github.com/nearbydelta/itypescript)
+It provide a prototype implementation of HPCC ECL for Jupyter Notebook by referencing [ITypeScript](https://github.com/nearbydelta/itypescript)
 
 The HPCC Systems server platform is a free, open source, massively scalable platform for big data analytics. Download the HPCC Systems server platform now and take the reins of the same core technology that LexisNexis has used for over a decade to analyze massive data sets for its customers in industry, law enforcement, government, and science.
 
