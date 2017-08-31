@@ -101,7 +101,7 @@ class Configuration {
     private hideUndefined: boolean = false;
     private protocolVer: string = "5.0";
     private onStartup: () => void = function () {
-        let tscode = fs.readFileSync(path.join(__dirname, "startup.ts")).toString();
+        let tscode = fs.readFileSync(path.join(__dirname, "startup.js")).toString();
         let code = ts.transpile(tscode, {});
         this.session.execute(code, {
             onSuccess: function () {
@@ -270,11 +270,11 @@ let kernel = new Kernel(config);
 
 // WORKAROUND: Fixes https://github.com/n-riesco/ijavascript/issues/97
 kernel.handlers.is_complete_request = function is_complete_request(request) {
-    request.respond(this.iopubSocket, 'status', {
-        execution_state: 'busy'
+    request.respond(this.iopubSocket, "status", {
+        execution_state: "busy"
     });
 
-    var content;
+    let content;
     try {
         new vm.Script(request.content.code);
         content = {
@@ -295,8 +295,8 @@ kernel.handlers.is_complete_request = function is_complete_request(request) {
         this.protocolVersion
     );
 
-    request.respond(this.iopubSocket, 'status', {
-        execution_state: 'idle'
+    request.respond(this.iopubSocket, "status", {
+        execution_state: "idle"
     });
 };
 

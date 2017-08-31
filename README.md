@@ -32,9 +32,9 @@ npm install -g d3-time-format
 ```
 To install itsecl kernel to Jupyter 
 ```sh
-itsecl --ts-install=global
+itsecl --ecl-install=global
 
-# If you want to see itsecl kernel debug message add "--ts-debug"
+# If you want to see itsecl kernel debug message add "--ecl-debug"
 # To verify ITSECL kernel (jsecl) installed in jupyter:
 jupyter kernelspec list. "tsecl" is the kernel name.
 ```
@@ -44,7 +44,7 @@ jupyter notebook
 
 # Or with debug information for tsecl kernel:
 
-itsecl --ts-debug   
+itsecl --ecl-debug   
 # Then select kernel "HPCC ECL - TSECL" from "new"
 ```
 To run ITSECL in jupyter console (Currenly support for console is limit. Try to use notebook instead). 
@@ -102,5 +102,24 @@ To change cluster
 ...
 ```
 
+### Debugging ECL kernel in vscode
 
+Launch kernel with:
+```sh
+node ./lib/itsecl.js --ecl-inspect
+```
 
+Open an ECL notebook and submit a cell (this will start the kernel process on the server)
+
+In vscode attach to the server process with a launch config similar to this:
+```json
+{
+    "type": "node",
+    "request": "attach",
+    "name": "Attach to Process",
+    "protocol": "inspector",
+    "port": 9229,
+    "localRoot": "${workspaceRoot}",
+    "remoteRoot": "/mnt/c/Users/gordon/git/itsecl"
+}
+```

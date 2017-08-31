@@ -1,3 +1,13 @@
+declare namespace NodeJS {
+    interface Global {
+        $$async$$: boolean;
+        $$done$$: (result: any) => void;
+        $$: {
+            done: (result: any) => void;
+            sendError: (error: Error) => void;
+        };
+    }
+}
 class $TS {
     static holdAsync() {
         global.$$async$$ = true;

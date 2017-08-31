@@ -1,0 +1,6 @@
+.ipynb*
+.vscode
+node_modules
+lib
+*.ipynb
+*.log

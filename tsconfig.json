@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "outDir": "./lib",
     "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitAny": false,
-    "sourceMap": false
+    "sourceMap": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise"
+    ],
+    "types": []
   },
-  "exclude": [
-    "lib/startup.ts",
-    "node_modules/",
-    "typings/"
+  "include": [
+    "src/**/*"
   ]
 }

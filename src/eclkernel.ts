@@ -38,7 +38,6 @@
 
 import * as fs from "fs";
 import { Workunit } from "@hpcc-js/comms";
-//import { WUAction } from "@hpcc-js/comms";
 import { Logger } from "./logging";
 import * as util  from "util";
 
@@ -69,22 +68,22 @@ export interface ESPConfig {
 
 
 export interface ECLSubmitResult {
-   [key:string]: string;
+   [key: string]: string;
 }
 
 export interface ECLSubmitError {
     ename:     string;
     evalue:    string;
-    traceback: string; 
+    traceback: string;
 }
 
 export class ECLResult  {
     mime: ECLSubmitResult = {};
-    error: ECLSubmitError = { ename: "", evalue: "", traceback: ""}
-   
+    error: ECLSubmitError = { ename: "", evalue: "", traceback: "" };
+
     renderInHtml(rows: any) {
-       if (rows.length == 0 ) {
-          this.mime['text/html'] = "No Result";
+        if (rows.length === 0) {
+            this.mime["text/html"] = "No Result";
           return;
        }
        let htmlTable = "<table style=\"border:1px; cellspacing:0; cellpadding:0; width: 100%; text-align:left\">\n";
@@ -94,19 +93,19 @@ export class ECLResult  {
        }
        htmlTable = htmlTable + "</tr>\n";
 
-       for (let i=0; i < rows.length; i++) {
-           htmlTable = htmlTable + "<tr><td>" + (i+1) + "</td>";
+       for (let i = 0; i < rows.length; i++) {
+           htmlTable = htmlTable + "<tr><td>" + (i + 1) + "</td>";
            for (let k in rows[i]) {
                let v = rows[i][k];
-               //if (typeof (v) == "string" ) {
+               // if (typeof (v) == "string" ) {
                //    v = v.trim();
-               //}
+               // }
                htmlTable = htmlTable + "<td>" + v + "</td>";
            }
            htmlTable = htmlTable + "</tr>\n";
        }
        htmlTable = htmlTable + "</table>";
-       this.mime['text/html'] = htmlTable;
+        this.mime["text/html"] = htmlTable;
     }
 
     setError(e: any) {
@@ -117,18 +116,18 @@ export class ECLResult  {
 }
 
 /**
- * @class 
- * @classdesc Implements HPCC ESP Connection and ECL code submittion for JS-ECL kernel 
+ * @class
+ * @classdesc Implements HPCC ESP Connection and ECL code submittion for JS-ECL kernel
  */
 export class ECLExecutor  {
 
-     protected ip: string  = "localhost"; 
-     protected port: number = 8010; 
-     protected cluster: string  = "hthor"; 
-     protected user: string = ""; 
-     protected password: string = ""; 
-     protected defaultTask: string = "ECL"; 
-     protected configFile: string = ""; 
+     protected ip: string  = "localhost";
+     protected port: number = 8010;
+     protected cluster: string  = "hthor";
+     protected user: string = "";
+     protected password: string = "";
+     protected defaultTask: string = "ECL";
+     protected configFile: string = "";
      eclResult = new ECLResult();
 
 
@@ -144,11 +143,11 @@ export class ECLExecutor  {
          return espConfig;
      }
 
-     getValue(str:string, key:string): string {
-         let re = new RegExp(key + "\s*=\s*[^;]*;", 'i');
+     getValue(str: string, key: string): string {
+        let re = new RegExp(key + "\s*=\s*[^;]*;", "i");
          let match = str.match(re);
          if (match != null) {
-             return match[0].split('=')[1].replace(";", "").trim();
+            return match[0].split("=")[1].replace(";", "").trim();
          }
          return "";
      }
@@ -181,23 +180,23 @@ export class ECLExecutor  {
          if (str.search("port\s*=") >= 0) {
              this.port = Number(this.getValue(str, "port"));
          }
-         if (str.search("cluster\s*=") >=0 ) {
+         if (str.search("cluster\s*=") >= 0 ) {
              this.cluster = this.getValue(str, "cluster");
          }
          if (str.search("default\s*=") >= 0) {
              this.defaultTask = this.getValue(str, "default");
          }
-         if (str.search("user\s*=") >=0) {
+         if (str.search("user\s*=") >= 0) {
              this.user = this.getValue(str, "user");
          }
-         if (str.search("password\s*=") >=0) {
+         if (str.search("password\s*=") >= 0) {
              this.password = this.getValue(str, "password");
          }
      }
 
-     getConfigFromFile(file:string): void {
+     getConfigFromFile(file: string): void {
          if (fs.existsSync(file)) {
-             let content =   fs.readFileSync(file, 'utf8');
+            let content = fs.readFileSync(file, "utf8");
              let str = content.replace(/\n/g, ";").replace(/\r/g, "").replace(/;\s*;/g, ";");
              this.getConfigFromString(str);
          }
@@ -206,8 +205,8 @@ export class ECLExecutor  {
 
     /**
      * Check type of the task from code
-     * 
-     * @param {String} code 
+     *
+     * @param {String} code
      */
     taskType(code: string): string {
         if (code.search(/^\s*\/\/CONN/i) >= 0) {
@@ -226,17 +225,17 @@ export class ECLExecutor  {
 
     /**
      * HPCC Handler for 'execute_request' message
-     * 
+     *
      * code @param {module:jmp~Message} request Request message
      */
     execute_request(base: any, request: any) {
         let task_type = this.taskType(request.content.code);
         let code = request.content.code;
-        if (task_type == "CONN")  {
+        if (task_type === "CONN") {
            // parse code to get espConfig
            this.setConfig(code);
-           //construct code for connection test
-           code = "'Connection with HPCC ESP server succeed';"; 
+           // construct code for connection test
+           code = "'Connection with HPCC ESP server succeed';";
         } else { // ECL
            if (code.search(/^\s*\/\/ECL\s* cluster.*/i) >= 0) {
              this.cluster = this.getValue(code, "cluster");
@@ -247,10 +246,10 @@ export class ECLExecutor  {
 
         this.beforeRun(base, request);
 
-        if (task_type == "CONF")  {
-           let configStr = "ip="+this.ip + " port=" + this.port + " cluster=" + this.cluster + 
+        if (task_type === "CONF") {
+           let configStr = "ip=" + this.ip + " port=" + this.port + " cluster=" + this.cluster +
            " user=" + this.user + " default=" + this.defaultTask;
-           let result = { mime: { 'text/plain': '\'Config: ' + configStr + '\'' } };
+            let result = { mime: { "text/plain": "'Config: " + configStr + "'" } };
            this.onSuccess(base, request, result);
            this.afterRun(base, request);
            return;
@@ -266,10 +265,10 @@ export class ECLExecutor  {
                 return results[0].fetchRows();
             }).then((rows) => {
                 //  Do Dtuff With Results !!!
-                if (task_type == "CONN")  {
-                    executor.eclResult.mime = {'text/plain': rows[0]['Result_1']};
+                if (task_type === "CONN") {
+                    executor.eclResult.mime = { "text/plain": rows[0]["Result_1"] };
                 } else {
-                    //executor.eclResult.mime = {'text/plain': 'ECL'};
+                    // executor.eclResult.mime = {'text/plain': 'ECL'};
                     executor.eclResult.renderInHtml(rows);
                 }
                 executor.onSuccess(base, request, executor.eclResult);
@@ -277,7 +276,7 @@ export class ECLExecutor  {
                 return wu;
             });
         }).then((wu) => {
-            if ( task_type == "CONN" ) {
+            if (task_type === "CONN") {
                  return wu.delete();
             }
         }).catch((e) => { // error handle
@@ -290,15 +289,15 @@ export class ECLExecutor  {
     }
 
     status_busy(base: any, request: any) {
-        request.respond(base.iopubSocket, 'status', {
-            execution_state: 'busy'
+        request.respond(base.iopubSocket, "status", {
+            execution_state: "busy"
         });
     }
 
 
     status_idle(base: any, request: any) {
-       request.respond(base.iopubSocket, 'status', {
-          execution_state: 'idle'
+        request.respond(base.iopubSocket, "status", {
+            execution_state: "idle"
        });
     }
 

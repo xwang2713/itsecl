@@ -21,22 +21,28 @@
     "url": "https://github.com/xwang2713/itsecl.git"
   },
   "bin": {
-    "itsecl": "bin/itsecl.js",
+    "itsecl": "lib/itsecl.js",
     "itseclkernel": "lib/kernel.js"
   },
   "dependencies": {
     "jpecl-kernel": "git+http://github.com/xwang2713/jpecl-kernel.git",
-    "typescript": "latest",
     "uuid": "^3.0.1",
-    "@hpcc-js/comms": "0.0.28"
+    "@hpcc-js/comms": "0.0.28",
+    "d3-time-format": "^2.0.5",
+    "request": "^2.81.0"
   },
   "devDependencies": {
-    "@types/node": "^8.0.13",
+    "@types/node": "^8.0.26",
     "debug": "latest",
-    "tslint": "latest"
+    "rimraf": "^2.6.1",
+    "tslint": "^5.7.0",
+    "typescript": "^2.4.2"
   },
   "scripts": {
-    "lint": "tslint bin/*.ts lib/*.ts",
-    "tsc": "npm run lint; tsc"
+    "clean": "rimraf ./lib",
+    "lint": "tslint src/*.ts",
+    "build": "tsc -p .",
+    "serve": "./lib/itsecl.js --ecl-inspect",
+    "kill": "kill $(pgrep jupyter)"
   }
 }
