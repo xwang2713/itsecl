@@ -51,15 +51,16 @@ Usage:
 
 The recognized options are:
   --help                        show ITSECL & notebook help
-  --ts-debug                    enable debug log level
-  --ts-help                     show ITSECL help
-  --ts-hide-undefined           do not show undefined results
-  --ts-install=[local|global]   install ITSECL kernel
-  --ts-protocol=version         set protocol version, e.g. 4.1
-  --ts-show-undefined           show undefined results
-  --ts-startup-script=path      run script on startup
+  --ecl-debug                    enable debug log level
+  --ecl-inspect                  enable chrome debugging
+  --ecl-help                     show ITSECL help
+  --ecl-hide-undefined           do not show undefined results
+  --ecl-install=[local|global]   install ITSECL kernel
+  --ecl-protocol=version         set protocol version, e.g. 4.1
+  --ecl-show-undefined           show undefined results
+  --ecl-startup-script=path      run script on startup
                                 (path can be a file or a folder)
-  --ts-working-dir=path         set session working directory
+  --ecl-working-dir=path         set session working directory
                                 (default = current working directory)
   --version                     show ITSECL version
 
@@ -152,13 +153,14 @@ enum InstallLoc {local, global}
 class Flags {
 
     private static debug: boolean = false;
+    private static inspect: boolean = false;
     private static install: InstallLoc;
     private static startup: string;
     private static cwd: string;
 
     static toString() {
         return `
-        FLAG: [debug? ${Flags.debug ? "on" : "off"}, 
+        FLAG: [debug? ${Flags.debug ? "on" : "off"},
                installAt: "${Flags.install}",
                startupScript: "${Flags.startup}",
                workingDirectory: "${Flags.cwd}"]`;
@@ -223,6 +225,9 @@ class Arguments {
 
     static get frontend() {
         return Arguments._frontend;
+    }
+    static passToNode(...args: string[]) {
+        Arguments._kernel.splice(1, 0, args.join("="));
     }
 
     static passToKernel(...args: string[]) {
@@ -315,13 +320,16 @@ class Main {
 
         for (let e of extraArgs) {
             let [name, ...values] = e.slice(2).split("=");
-            if (name.lastIndexOf("ts", 0) === 0) {
-                let subname = name.slice(3);
+            if (name.lastIndexOf("ecl", 0) === 0) {
+                let subname = name.slice(4);
                 switch (subname) {
                     case "debug":
                         Logger.onVerbose();
                         Flags.onDebug();
                         Arguments.passToKernel("--debug");
+                        break;
+                    case "inspect":
+                        Arguments.passToNode("--inspect");
                         break;
                     case "hide-undefined":
                     case "show-undefined":
@@ -511,7 +519,7 @@ class Main {
         let specFile = path.join(specDir, "kernel.json");
         let spec = {
             argv: Arguments.kernel,
-            //display_name: `TSECL  ${Main.packageJSON.version.replace(/([0-9]+\.[0-9]+)\..*/g,"$1")}`,
+            // display_name: `TSECL  ${Main.packageJSON.version.replace(/([0-9]+\.[0-9]+)\..*/g,"$1")}`,
             display_name: "HPCC ECL - TSECL",
             language: "typescript",
         };
