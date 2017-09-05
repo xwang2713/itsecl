@@ -27,9 +27,7 @@
   "dependencies": {
     "jpecl-kernel": "git+http://github.com/xwang2713/jpecl-kernel.git",
     "uuid": "^3.0.1",
-    "@hpcc-js/comms": "0.0.28",
-    "d3-time-format": "^2.0.5",
-    "request": "^2.81.0"
+    "@hpcc-js/comms": "0.0.35"
   },
   "devDependencies": {
     "@types/node": "^8.0.26",
@@ -43,6 +41,7 @@
     "lint": "tslint src/*.ts",
     "build": "tsc -p .",
     "serve": "./lib/itsecl.js --ecl-inspect",
-    "kill": "kill $(pgrep jupyter)"
+    "kill": "kill $(pgrep jupyter)",
+    "retart":"npm run kill && npm run serve"
   }
 }

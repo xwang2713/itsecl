@@ -35,7 +35,6 @@
  *
  */
 
-
 import * as fs from "fs";
 import { Workunit } from "@hpcc-js/comms";
 import { Logger } from "./logging";
@@ -74,12 +73,12 @@ export interface ECLSubmitResult {
 export interface ECLSubmitError {
     ename:     string;
     evalue:    string;
-    traceback: string;
+    traceback: string[];
 }
 
 export class ECLResult  {
     mime: ECLSubmitResult = {};
-    error: ECLSubmitError = { ename: "", evalue: "", traceback: "" };
+    error: ECLSubmitError = { ename: "", evalue: "", traceback: [""] };
 
     renderInHtml(rows: any) {
         if (rows.length === 0) {
@@ -108,10 +107,10 @@ export class ECLResult  {
         this.mime["text/html"] = htmlTable;
     }
 
-    setError(e: any) {
+    setError(e?: { name?: string, message?: string, stack?: string }) {
        this.error.ename =  (e && e.name) ? e.name : typeof e;
        this.error.evalue =  (e && e.message) ? e.message : util.inspect(e);
-       this.error.traceback =  (e && e.stack) ? e.stack.split("\n") : "";
+       this.error.traceback =  (e && e.stack) ? e.stack.split("\n") : [""];
     }
 }
 
@@ -260,21 +259,31 @@ export class ECLExecutor  {
         Logger.log ("code: " + code);
         Workunit.submit({ baseUrl: ESP_URL, userID: this.user, password: this.password }, this.cluster, code).then((wu) => {
             return wu.watchUntilComplete();
-        }).then((wu) => {
-            return wu.fetchResults().then((results) => {
-                return results[0].fetchRows();
-            }).then((rows) => {
-                //  Do Dtuff With Results !!!
-                if (task_type === "CONN") {
-                    executor.eclResult.mime = { "text/plain": rows[0]["Result_1"] };
-                } else {
-                    // executor.eclResult.mime = {'text/plain': 'ECL'};
-                    executor.eclResult.renderInHtml(rows);
-                }
-                executor.onSuccess(base, request, executor.eclResult);
-                executor.afterRun(base, request);
+        }).then(wu => {
+            if (wu.isFailed()) {
+                executor.eclResult.setError({
+                    name: "ECL Error",
+                    message: "",
+                    stack: wu.eclExceptions().map(e => e.Message).join("\n")
+                });
+                executor.onError(base, request, executor.eclResult);
                 return wu;
-            });
+            } else {
+                return wu.fetchResults().then((results) => {
+                    return results[0].fetchRows();
+                }).then((rows) => {
+                    //  Do Dtuff With Results !!!
+                    if (task_type === "CONN") {
+                        executor.eclResult.mime = { "text/plain": rows[0]["Result_1"] };
+                    } else {
+                        // executor.eclResult.mime = {'text/plain': 'ECL'};
+                        executor.eclResult.renderInHtml(rows);
+                    }
+                    executor.onSuccess(base, request, executor.eclResult);
+                    executor.afterRun(base, request);
+                    return wu;
+                });
+            }
         }).then((wu) => {
             if (task_type === "CONN") {
                  return wu.delete();
